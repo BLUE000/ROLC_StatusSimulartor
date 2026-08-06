@@ -104,6 +104,12 @@ private slots:
 
         // UT-MASTER-006: Free / Other Share (1) -> Max level is 100
         QCOMPARE(rolc::MasterData::getMaxLevelForShareCategory(1), 100);
+
+        // UT-MASTER-008: Kingdom Edition -> Max level is 50
+        QCOMPARE(rolc::MasterData::getMaxLevelForEdition(rolc::Edition::Kingdom), 50);
+
+        // UT-MASTER-009: Earth Edition -> Max level is 100
+        QCOMPARE(rolc::MasterData::getMaxLevelForEdition(rolc::Edition::Earth), 100);
     }
 
     void testStatusTitleBonus() {

@@ -18,6 +18,7 @@ public:
 
 public slots:
     // Slot handlers for user interface events (Testable via GTest / QTest)
+    void onEditionSelected(Edition edition);
     void onShareCategorySelected(int categoryIndex);
     void onCharacterSelected(int characterId);
     void onLevelChanged(int level);

@@ -27,6 +27,7 @@ private slots:
 private:
     SimulatorPresenter* m_presenter;
 
+    QComboBox* m_editionCombo;
     QComboBox* m_shareCombo;
     QLabel* m_levelLimitNoticeLabel;
     QComboBox* m_characterCombo;

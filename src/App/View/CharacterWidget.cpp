@@ -19,19 +19,28 @@ CharacterWidget::CharacterWidget(SimulatorPresenter* presenter, QWidget* parent)
     QGroupBox* charGroup = new QGroupBox("キャラクター・基本情報", this);
     QGridLayout* charGrid = new QGridLayout(charGroup);
 
-    charGrid->addWidget(new QLabel("シェア:"), 0, 0);
+    charGrid->addWidget(new QLabel("編区分:"), 0, 0);
+    m_editionCombo = new QComboBox(this);
+    for (const auto& ed : MasterData::getEditions()) {
+        m_editionCombo->addItem(QString::fromStdString(ed));
+    }
+    // Default to Earth Edition (index 1)
+    m_editionCombo->setCurrentIndex(1);
+    charGrid->addWidget(m_editionCombo, 0, 1);
+
+    charGrid->addWidget(new QLabel("シェア:"), 0, 2);
     m_shareCombo = new QComboBox(this);
     for (const auto& share : MasterData::getShareCategories()) {
         m_shareCombo->addItem(QString::fromStdString(share));
     }
-    charGrid->addWidget(m_shareCombo, 0, 1);
+    charGrid->addWidget(m_shareCombo, 0, 3);
 
     m_levelLimitNoticeLabel = new QLabel("[レベル上限: Lv100 (大地編/フリー)]", this);
-    charGrid->addWidget(m_levelLimitNoticeLabel, 0, 2);
+    charGrid->addWidget(m_levelLimitNoticeLabel, 0, 4);
 
-    charGrid->addWidget(new QLabel("キャラ:"), 0, 3);
+    charGrid->addWidget(new QLabel("キャラ:"), 0, 5);
     m_characterCombo = new QComboBox(this);
-    charGrid->addWidget(m_characterCombo, 0, 4);
+    charGrid->addWidget(m_characterCombo, 0, 6);
 
     charGrid->addWidget(new QLabel("モラル:"), 1, 0);
     m_moralSpin = new QSpinBox(this);
@@ -127,9 +136,13 @@ CharacterWidget::CharacterWidget(SimulatorPresenter* presenter, QWidget* parent)
     updateLevelLimits();
 
     // Connect signals to Presenter slots
+    connect(m_editionCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int idx) {
+        Edition edition = static_cast<Edition>(idx);
+        updateLevelLimits();
+        m_presenter->onEditionSelected(edition);
+    });
     connect(m_shareCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int idx) {
         m_presenter->onShareCategorySelected(idx);
-        updateLevelLimits();
     });
     connect(m_characterCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int idx) {
         int charId = m_characterCombo->itemData(idx).toInt();
@@ -262,14 +275,14 @@ void CharacterWidget::updateDerivedClassCombos() {
 }
 
 void CharacterWidget::updateLevelLimits() {
-    int shareIdx = m_shareCombo->currentIndex();
-    int maxLvl = MasterData::getMaxLevelForShareCategory(shareIdx);
+    Edition edition = static_cast<Edition>(m_editionCombo->currentIndex());
+    int maxLvl = MasterData::getMaxLevelForEdition(edition);
 
-    if (shareIdx == 2) { // 王国編
-        m_levelLimitNoticeLabel->setText("[レベル上限: Lv50 (王国編制限)]");
+    if (edition == Edition::Kingdom) { // 王国編
+        m_levelLimitNoticeLabel->setText("[レベル上限: Lv50 (王国編)]");
         m_levelLimitNoticeLabel->setStyleSheet("QLabel { font-weight: bold; color: #ffaa00; background-color: #332200; padding: 2px 6px; border-radius: 3px; }");
     } else {
-        m_levelLimitNoticeLabel->setText("[レベル上限: Lv100 (大地編/フリー)]");
+        m_levelLimitNoticeLabel->setText("[レベル上限: Lv100 (大地編)]");
         m_levelLimitNoticeLabel->setStyleSheet("QLabel { font-weight: bold; color: #00d2ff; background-color: #002233; padding: 2px 6px; border-radius: 3px; }");
     }
 

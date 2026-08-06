@@ -76,7 +76,13 @@ struct AmplifierBonus {
     std::array<int, 6> flatBonuses; // STR, DEX, VIT, INT, CON, MEN
 };
 
+enum class Edition {
+    Kingdom = 0, // 王国編 (Level cap 50)
+    Earth = 1    // 大地編 (Level cap 100)
+};
+
 struct UserBuildState {
+    Edition edition{Edition::Earth};
     int shareCategoryId{1};
     int characterId{1};
     int level{1};

@@ -345,6 +345,22 @@ const AmplifierBonus* MasterData::getAmplifierBonusById(int id) {
     return nullptr;
 }
 
+static const std::vector<std::string> g_editions = {
+    "王国編",
+    "大地編"
+};
+
+const std::vector<std::string>& MasterData::getEditions() {
+    return g_editions;
+}
+
+int MasterData::getMaxLevelForEdition(Edition edition) {
+    if (edition == Edition::Kingdom) {
+        return 50;
+    }
+    return 100;
+}
+
 const std::vector<std::string>& MasterData::getShareCategories() {
     return g_shareCategories;
 }

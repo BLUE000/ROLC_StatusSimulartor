@@ -22,6 +22,8 @@ public:
     static const std::vector<AmplifierBonus>& getAmplifierBonuses();
     static const AmplifierBonus* getAmplifierBonusById(int id);
 
+    static const std::vector<std::string>& getEditions();
+    static int getMaxLevelForEdition(Edition edition);
     static const std::vector<std::string>& getShareCategories();
     static int getMaxLevelForShareCategory(int shareCategoryId);
 };

@@ -41,6 +41,11 @@ private slots:
         QVERIFY(presenter.getState().desperateAttack);
         QCOMPARE(mockView.updateCallCount, 4);
 
+        // Simulate user selecting Edition (Kingdom)
+        presenter.onEditionSelected(rolc::Edition::Kingdom);
+        QCOMPARE(presenter.getState().edition, rolc::Edition::Kingdom);
+        QCOMPARE(mockView.updateCallCount, 5);
+
         // Verify that stats were recalculated correctly
         QVERIFY(mockView.lastResult.finalStats[0] > 0);
     }

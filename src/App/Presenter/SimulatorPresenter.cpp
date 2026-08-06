@@ -10,6 +10,11 @@ SimulatorPresenter::SimulatorPresenter(ISimulatorView* view, QObject* parent)
     m_state.level = m_state.historyClassLevels[0];
 }
 
+void SimulatorPresenter::onEditionSelected(Edition edition) {
+    m_state.edition = edition;
+    recalculate();
+}
+
 void SimulatorPresenter::onShareCategorySelected(int categoryIndex) {
     m_state.shareCategoryId = categoryIndex;
     recalculate();
