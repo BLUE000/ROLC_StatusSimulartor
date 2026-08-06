@@ -67,24 +67,25 @@ void StatusWidget::updateStats(const DerivedStatsResult& result) {
 
     for (int i = 0; i < 6; ++i) {
         int curStat = result.finalStats[i];
-        int maxStat = result.maxTheoreticalStats[i];
-
-        if (curStat == maxStat) {
-            m_statValLabels[i]->setText(QString::number(curStat));
-        } else {
-            m_statValLabels[i]->setText(QString("%1 [最大: %2]").arg(curStat).arg(maxStat));
-        }
-
+        int baseStat = result.baseStats[i];
         int bonus = result.statPercentBonuses[i];
-        int maxBonus = result.maxTheoreticalPercentBonuses[i];
-        QString sign = (bonus >= 0) ? "+" : "";
-        QString maxSign = (maxBonus >= 0) ? "+" : "";
 
-        if (bonus == maxBonus) {
-            m_bonusPercentLabels[i]->setText(QString("( %1%2% )").arg(sign).arg(bonus));
+        m_statValLabels[i]->setText(QString::number(curStat));
+        if (curStat > 0) {
+            m_statValLabels[i]->setStyleSheet("font-weight: bold; font-size: 13px; color: #2e7d32;");
+        } else if (curStat < 0) {
+            m_statValLabels[i]->setStyleSheet("font-weight: bold; font-size: 13px; color: #c62828;");
         } else {
-            m_bonusPercentLabels[i]->setText(QString("( %1%2% [最大 %3%4%] )").arg(sign).arg(bonus).arg(maxSign).arg(maxBonus));
+            m_statValLabels[i]->setStyleSheet("font-weight: bold; font-size: 13px; color: black;");
         }
+
+        QString sign = (bonus >= 0) ? "+" : "-";
+        int absBonus = std::abs(bonus);
+
+        m_bonusPercentLabels[i]->setText(QString("(  %1  %2  %3 % )")
+            .arg(baseStat)
+            .arg(sign)
+            .arg(absBonus));
     }
 }
 

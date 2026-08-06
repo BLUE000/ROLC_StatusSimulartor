@@ -131,6 +131,9 @@ struct UserBuildState {
 };
 
 struct DerivedStatsResult {
+    // Level Base Stats + Making Points
+    std::array<int, 6> baseStats{0, 0, 0, 0, 0, 0};
+
     // Calculated Base Stats (Final Values)
     std::array<int, 6> finalStats{0, 0, 0, 0, 0, 0};
     std::array<int, 6> statPercentBonuses{0, 0, 0, 0, 0, 0};

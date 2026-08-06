@@ -189,6 +189,7 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
         }
     }
 
+    res.baseStats = allocatedStats;
     res.statPercentBonuses = percentBonuses;
     res.maxTheoreticalPercentBonuses = maxTheoreticalPercentBonuses;
 
