@@ -1,0 +1,2 @@
+# ROLC_StatusSimulartor
+ROLCのステータスシミュレーターです
