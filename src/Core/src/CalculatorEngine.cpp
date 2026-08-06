@@ -261,54 +261,60 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
     }
 
     // 6. Calculate Physical ATK (statusbonus.js: store_atk_matk_val)
-    res.maxAtk = str / 2 + state.equipAtk;
-    int baseMinAtk = dex + state.equipAtk / 2;
-    int capMinAtk = str / 2 + state.equipAtk;
-    res.minAtk = std::min(baseMinAtk, capMinAtk);
+    double rawMaxAtk = str / 2.0 + state.equipAtk;
+    double rawMinAtk = std::min(dex + state.equipAtk / 2.0, std::floor(str / 2.0) + state.equipAtk);
 
-    // Critical Rate % (statusbonus.js: calc_critical_rate)
+    res.maxAtk = static_cast<int>(std::floor(rawMaxAtk));
+    res.minAtk = static_cast<int>(std::floor(rawMinAtk));
+
     // Physical Critical Rate (statusbonus.js: calc_critical_rate)
     double uncappedMinAtk = dex + state.equipAtk / 2.0;
-    if (res.maxAtk < uncappedMinAtk && res.maxAtk > 0) {
-        res.atkCriticalRate = ((uncappedMinAtk / res.maxAtk) - 1.0) * 50.0 + state.equipCrit;
+    if (rawMaxAtk < uncappedMinAtk && rawMaxAtk > 0) {
+        res.atkCriticalRate = ((uncappedMinAtk / rawMaxAtk) - 1.0) * 50.0 + state.equipCrit;
     } else {
         res.atkCriticalRate = state.equipCrit;
     }
     if (res.atkCriticalRate > 100.0) res.atkCriticalRate = 100.0;
     if (res.atkCriticalRate < 0.0) res.atkCriticalRate = 0.0;
 
-    // ATK Expectation (statusbonus.js: calc_expectation)
-    double avgAtk = (res.minAtk + res.maxAtk) / 2.0;
+    // Physical Expectation (statusbonus.js: calc_expectation)
+    double avgAtk = (rawMaxAtk + rawMinAtk) / 2.0;
     double expAtk = avgAtk * (1.0 + (res.atkCriticalRate / 100.0) * 0.8);
     res.atkExpectation = std::round(expAtk * 10000.0) / 10000.0;
 
     // 7. Calculate Magical MATK (statusbonus.js: store_atk_matk_val)
-    res.maxMatk = intStat / 2 + state.equipMatk;
-    int baseMinMatk = conStat + state.equipMatk / 2;
-    int capMinMatk = intStat / 2 + state.equipMatk;
-    res.minMatk = std::min(baseMinMatk, capMinMatk);
+    double rawMaxMatk = intStat / 2.0 + state.equipMatk;
+    double rawMinMatk = std::min(conStat + state.equipMatk / 2.0, std::floor(intStat / 2.0) + state.equipMatk);
+
+    res.maxMatk = static_cast<int>(std::floor(rawMaxMatk));
+    res.minMatk = static_cast<int>(std::floor(rawMinMatk));
 
     // Magical Critical Rate
     double uncappedMinMatk = conStat + state.equipMatk / 2.0;
-    if (res.maxMatk < uncappedMinMatk && res.maxMatk > 0) {
-        res.matkCriticalRate = ((uncappedMinMatk / res.maxMatk) - 1.0) * 50.0 + state.equipCrit;
+    if (rawMaxMatk < uncappedMinMatk && rawMaxMatk > 0) {
+        res.matkCriticalRate = ((uncappedMinMatk / rawMaxMatk) - 1.0) * 50.0 + state.equipCrit;
     } else {
         res.matkCriticalRate = state.equipCrit;
     }
     if (res.matkCriticalRate > 100.0) res.matkCriticalRate = 100.0;
     if (res.matkCriticalRate < 0.0) res.matkCriticalRate = 0.0;
 
-    double avgMatk = (res.minMatk + res.maxMatk) / 2.0;
+    double avgMatk = (rawMaxMatk + rawMinMatk) / 2.0;
     double expMatk = avgMatk * (1.0 + (res.matkCriticalRate / 100.0) * 0.8);
     res.matkExpectation = std::round(expMatk * 10000.0) / 10000.0;
 
     // 8. Calculate Combined AtkMatk (物魔) (statusbonus.js: store_atk_matk_val)
     double hybridFactor = state.desperateAssault ? 1.20 : 1.15;
-    res.maxAtkMatk = static_cast<int>(std::floor((res.maxAtk + res.maxMatk) / 2.0 * hybridFactor));
-    res.minAtkMatk = static_cast<int>(std::floor((res.minAtk + res.minMatk) / 2.0 * hybridFactor));
-    res.atkMatkCriticalRate = (res.atkCriticalRate + res.matkCriticalRate) / 2.0;
-    double avgAtkMatk = (res.minAtkMatk + res.maxAtkMatk) / 2.0;
-    res.atkMatkExpectation = std::round(avgAtkMatk * (1.0 + (res.atkMatkCriticalRate / 100.0) * 0.8) * 10000.0) / 10000.0;
+    double rawMaxAtkMatk = ((std::floor(rawMaxAtk) + std::floor(rawMaxMatk)) / 2.0) * hybridFactor;
+    double rawMinAtkMatk = ((std::floor(rawMinAtk) + std::floor(rawMinMatk)) / 2.0) * hybridFactor;
+
+    res.maxAtkMatk = static_cast<int>(std::floor(rawMaxAtkMatk));
+    res.minAtkMatk = static_cast<int>(std::floor(rawMinAtkMatk));
+    res.atkMatkCriticalRate = std::min(100.0, (res.atkCriticalRate + res.matkCriticalRate) / 2.0);
+
+    double avgAtkMatk = (rawMaxAtkMatk + rawMinAtkMatk) / 2.0;
+    double expAtkMatk = avgAtkMatk * (1.0 + (res.atkMatkCriticalRate / 100.0) * 0.8);
+    res.atkMatkExpectation = std::round(expAtkMatk * 10000.0) / 10000.0;
 
     // 9. Charge frames (下限 5f)
     res.rightChargeFrames = std::max(5, 12 - dex / 10);

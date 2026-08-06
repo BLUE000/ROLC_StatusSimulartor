@@ -82,16 +82,16 @@ OutputWidget::OutputWidget(QWidget* parent)
 
 void OutputWidget::updateOutput(const DerivedStatsResult& res) {
     m_physAtkLabel->setText(QString("%1 - %2").arg(res.minAtk).arg(res.maxAtk));
-    m_physCritLabel->setText(QString("%1 %").arg(res.atkCriticalRate, 0, 'f', 1));
-    m_physExpLabel->setText(QString::number(res.atkExpectation, 'f', 1));
+    m_physCritLabel->setText(QString("%1 %").arg(res.atkCriticalRate, 0, 'f', (res.atkCriticalRate == std::floor(res.atkCriticalRate)) ? 1 : 1));
+    m_physExpLabel->setText(QString::number(res.atkExpectation));
 
     m_magMatkLabel->setText(QString("%1 - %2").arg(res.minMatk).arg(res.maxMatk));
-    m_magCritLabel->setText(QString("%1 %").arg(res.matkCriticalRate, 0, 'f', 1));
-    m_magExpLabel->setText(QString::number(res.matkExpectation, 'f', 1));
+    m_magCritLabel->setText(QString("%1 %").arg(res.matkCriticalRate, 0, 'f', (res.matkCriticalRate == std::floor(res.matkCriticalRate)) ? 1 : 1));
+    m_magExpLabel->setText(QString::number(res.matkExpectation));
 
     m_combinedAtkLabel->setText(QString("%1 - %2").arg(res.minAtkMatk).arg(res.maxAtkMatk));
-    m_combinedCritLabel->setText(QString("%1 %").arg(res.atkMatkCriticalRate, 0, 'f', 1));
-    m_combinedExpLabel->setText(QString::number(res.atkMatkExpectation, 'f', 1));
+    m_combinedCritLabel->setText(QString("%1 %").arg(res.atkMatkCriticalRate, 0, 'f', (res.atkMatkCriticalRate == std::floor(res.atkMatkCriticalRate)) ? 1 : 1));
+    m_combinedExpLabel->setText(QString::number(res.atkMatkExpectation));
 
     if (res.hp == res.maxTheoreticalHp) {
         m_hpLabel->setText(QString::number(res.hp));

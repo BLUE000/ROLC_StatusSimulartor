@@ -230,7 +230,7 @@ private slots:
         QCOMPARE(res.minAtkMatk, 221);
         QCOMPARE(res.maxAtkMatk, 293);
         QCOMPARE(res.atkMatkCriticalRate, 5.0);
-        QCOMPARE(res.atkMatkExpectation, 267.28);
+        QCOMPARE(res.atkMatkExpectation, 268.203);
     }
 };
 
