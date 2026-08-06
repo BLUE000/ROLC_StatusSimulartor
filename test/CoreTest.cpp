@@ -190,9 +190,9 @@ private slots:
 
         state.rightHandTitleId = 54; // 全能 (+20%)
         state.leftHandTitleId = 54;  // 全能 (+20%)
-        state.bodyTitleId = 45;       // 不倒 (VM+40%)
-        state.handTitleId = 48;       // 覇気 (SDV+30%)
-        state.legTitleId = 54;        // 全能 (+20%)
+        state.bodyTitleId = 45;      // 不倒 (VIT/MEN+40%)
+        state.handTitleId = 48;      // 覇気 (STR/DEX/VIT+30%)
+        state.legTitleId = 54;       // 全能 (+20%)
 
         auto res = rolc::CalculatorEngine::calculate(state);
 
@@ -203,7 +203,7 @@ private slots:
                  << "CON %:" << res.statPercentBonuses[4] << "MEN %:" << res.statPercentBonuses[5];
         qDebug() << "HP:" << res.hp << "minAtk:" << res.minAtk << "maxAtk:" << res.maxAtk;
 
-        // Final stats check against Qt App Screenshot titles
+        // Final stats check for handTitleId = 48 (覇気)
         QCOMPARE(res.finalStats[0], 180); // STR
         QCOMPARE(res.finalStats[1], 133); // DEX
         QCOMPARE(res.finalStats[2], 148); // VIT
