@@ -13,5 +13,5 @@
 | :--- | :--- | :--- | :--- |
 | **UT-MASTER-007** | `MasterData::getTitleBonusById` | 称号「剛力」 (ID: 4) | STR 補正 +60% が正しく返却されること |
 | **UT-MASTER-010** | `MasterData::getTitleBonusById` | 称号「蛮勇」 | STR/VIT 補正各 +20% が正しく返却されること |
-| **UT-MASTER-011** | `MasterData::getTitleBonusById` | 称号「闘気」 | STR/DEX/VIT 補正各 +25% が正しく返却されること |
+| **UT-MASTER-011** | `MasterData::getTitleBonusById` | 称号「闘気」 | STR/DEX/VIT 補正各 +20% が正しく返却されること |
 | **UT-MASTER-012** | `MasterData::getTitleBonusById` | 称号「万能」 | 全ステータス 補正各 +15% が正しく返却されること |

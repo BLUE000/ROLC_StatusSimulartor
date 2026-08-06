@@ -132,13 +132,13 @@ private slots:
         QCOMPARE(title28->percentBonuses[0], 20);
         QCOMPARE(title28->percentBonuses[2], 20);
 
-        // UT-MASTER-011: 闘気 (ID: 47) -> STR/DEX/VIT +25%
+        // UT-MASTER-011: 闘気 (ID: 47) -> STR/DEX/VIT +20%
         auto title47 = rolc::MasterData::getTitleBonusById(47);
         QVERIFY(title47 != nullptr);
-        QCOMPARE(title47->name, std::string("闘気 (STR/DEX/VIT+25%)"));
-        QCOMPARE(title47->percentBonuses[0], 25);
-        QCOMPARE(title47->percentBonuses[1], 25);
-        QCOMPARE(title47->percentBonuses[2], 25);
+        QCOMPARE(title47->name, std::string("闘気 (STR/DEX/VIT+20%)"));
+        QCOMPARE(title47->percentBonuses[0], 20);
+        QCOMPARE(title47->percentBonuses[1], 20);
+        QCOMPARE(title47->percentBonuses[2], 20);
 
         // UT-MASTER-012: 万能 (ID: 53) -> All +15%
         auto title53 = rolc::MasterData::getTitleBonusById(53);
