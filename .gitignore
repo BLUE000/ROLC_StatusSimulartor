@@ -1,0 +1,24 @@
+# Build outputs and temporary packaging directories
+build/
+dist/
+tmp/
+*.zip
+
+# IDE & system metadata
+.vscode/
+.idea/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+*.log
+test_out.txt
+testout.txt
+
+# TrustChain secret credentials (DO NOT COMMIT)
+trustchain_credentials.cmake
+
+# Repository management exclusions as requested by user
+DecisionLog/
+.ai_rules.md
+WIP_STATE.md
