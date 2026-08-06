@@ -11,21 +11,8 @@ FormulaConfig FormulaConfig::defaultConfig() {
     cfg.baseMakingPoints = 100;
     cfg.classUnlockMakingPointBonus = 10;
 
-    cfg.hpFormula = [](int lvl, int vit) {
-        int lvlDiv10 = lvl / 10;
-        double hpPart1 = (lvl + 20) * ((lvl + 20) * (vit * 3 + lvlDiv10 + 40) + 5000) / 5000.0;
-        int hpPart2 = (lvlDiv10 + 2) * (lvlDiv10 + 2);
-        int val = static_cast<int>(std::floor(hpPart1)) - hpPart2;
-        return std::max(0, val);
-    };
-
-    cfg.mpFormula = [](int lvl, int intStat) {
-        int lvlDiv10 = lvl / 10;
-        double mpPart1 = (lvl + 20) * ((lvl + 20) * (intStat * 3 + lvlDiv10 + 40) + 5000) / 5000.0;
-        int mpPart2 = (lvlDiv10 + 2) * (lvlDiv10 + 2);
-        int val = static_cast<int>(std::floor(mpPart1)) - mpPart2;
-        return std::max(0, val);
-    };
+    cfg.hpFormula = nullptr;
+    cfg.mpFormula = nullptr;
 
     cfg.maxAtkFormula = [](int lvl, int stat) {
         double rawMax = (lvl + 20) * ((lvl + 20) * (stat * 3 + lvl / 2.0 + 40) + 10000.0) / 10000.0;
@@ -70,11 +57,27 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
     }
     res.remainingMakingPoints = res.maxMakingPoints - totalCost;
 
-    // 2. Fetch Character Base Stats
+    // Determine Effective Level
+    int currentStageIdx = static_cast<int>(state.currentClassStage) - 1;
+    int currentClassLvl = state.historyClassLevels[currentStageIdx];
+    if (currentClassLvl <= 0) currentClassLvl = 100;
+    int effectiveLvl = (state.restrictedLevel > 0) ? std::min(currentClassLvl, state.restrictedLevel) : currentClassLvl;
+
+    // 2. Fetch Character Base Stats (Dynamic calculation based on effectiveLvl)
     const CharacterData* charData = MasterData::getCharacterById(state.characterId);
     std::array<int, 6> charBase = {0, 0, 0, 0, 0, 0};
     if (charData) {
-        charBase = charData->baseStats;
+        if (state.characterId >= 53) {
+            charBase = charData->baseStats;
+        } else {
+            for (int i = 0; i < 6; ++i) {
+                double bPlus20 = effectiveLvl + 20.0;
+                double bDiv10 = effectiveLvl / 10.0;
+                double val1 = (bPlus20 * ((bPlus20 * (charData->baseStatCoeffs[i] * 3.0 + bDiv10 + 40.0) + 1000.0) / 1000.0));
+                double val2 = (bDiv10 + 2.0) * (bDiv10 + 2.0);
+                charBase[i] = static_cast<int>(std::floor(val1 - val2));
+            }
+        }
     }
 
     // Add Making Points to character base
@@ -145,11 +148,6 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
     }
 
     // History Class Level Scaling Bonuses
-    int currentStageIdx = static_cast<int>(state.currentClassStage) - 1;
-    int currentClassLvl = state.historyClassLevels[currentStageIdx];
-    if (currentClassLvl <= 0) currentClassLvl = 1;
-
-    int effectiveLvl = (state.restrictedLevel > 0) ? std::min(currentClassLvl, state.restrictedLevel) : currentClassLvl;
 
     const int classIds[5] = {
         state.firstClassId, state.secondClassId, state.thirdClassId,
@@ -166,23 +164,28 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
 
         const ClassData* histClass = MasterData::getClassById(stages[s], classIds[s]);
         if (histClass) {
-            int histLvl = state.historyClassLevels[s];
-            if (histLvl < 0) histLvl = 0;
-            int effectiveHistLvl = std::min(histLvl, effectiveLvl);
-
-            double ratio = (static_cast<double>(effectiveHistLvl) / effectiveLvl) / 2.0;
-            double maxRatio = (100.0 / effectiveLvl) / 2.0;
-
             for (int i = 0; i < 6; ++i) {
-                double baseHist = 10.0 * ratio;
-                double classHist = (histClass->statBonuses[i] / 2.0) * ratio;
-
-                double maxBaseHist = 10.0 * maxRatio;
-                double maxClassHist = (histClass->statBonuses[i] / 2.0) * maxRatio;
-
-                percentBonuses[i] += static_cast<int>(std::round(baseHist + classHist));
-                maxTheoreticalPercentBonuses[i] += static_cast<int>(std::round(maxBaseHist + maxClassHist));
+                int halfBonus = histClass->statBonuses[i] / 2;
+                percentBonuses[i] += halfBonus;
+                maxTheoreticalPercentBonuses[i] += halfBonus;
             }
+        }
+    }
+
+    // Compute max_status_bonus_point cap (statusbonus.js)
+    int additionalClassCount = 0;
+    if (state.secondClassId != 0) additionalClassCount++;
+    if (state.thirdClassId != 0) additionalClassCount++;
+    if (state.fourthClassId != 0) additionalClassCount++;
+    if (state.exClassId != 0) additionalClassCount++;
+    int maxBonusCap = 100 + 10 * additionalClassCount;
+
+    for (int i = 0; i < 6; ++i) {
+        if (percentBonuses[i] > maxBonusCap) {
+            percentBonuses[i] = maxBonusCap;
+        }
+        if (maxTheoreticalPercentBonuses[i] > maxBonusCap) {
+            maxTheoreticalPercentBonuses[i] = maxBonusCap;
         }
     }
 
@@ -241,8 +244,10 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
         res.hp = config.hpFormula(lvl, vit);
         res.maxTheoreticalHp = config.hpFormula(lvl, maxVit);
     } else {
-        int charHpCoeff = charData ? charData->baseStats[static_cast<int>(StatType::VIT)] : 10;
-        res.hp = static_cast<int>(std::floor((lvl + 20) * ((lvl + 20) * (charHpCoeff * 60 + lvl / 2.0 + 600) + 5000) / 5000.0)) * 10;
+        int charHpCoeff = charData ? charData->hpCoeff : 6;
+        double aPlus20 = effectiveLvl + 20.0;
+        double hpVal = aPlus20 * ((aPlus20 * (charHpCoeff * 60.0 + effectiveLvl / 2.0 + 600.0) + 5000.0) / 5000.0);
+        res.hp = static_cast<int>(std::floor(hpVal)) * 10;
         res.maxTheoreticalHp = res.hp;
     }
 
@@ -261,9 +266,10 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
     res.minAtk = std::min(baseMinAtk, capMinAtk);
 
     // Critical Rate % (statusbonus.js: calc_critical_rate)
-    if (res.maxAtk > res.minAtk && res.minAtk > 0) {
-        double critRatio = ((static_cast<double>(res.maxAtk) / res.minAtk) - 1.0) * 50.0;
-        res.atkCriticalRate = critRatio + state.equipCrit;
+    // Physical Critical Rate (statusbonus.js: calc_critical_rate)
+    double uncappedMinAtk = dex + state.equipAtk / 2.0;
+    if (res.maxAtk < uncappedMinAtk && res.maxAtk > 0) {
+        res.atkCriticalRate = ((uncappedMinAtk / res.maxAtk) - 1.0) * 50.0 + state.equipCrit;
     } else {
         res.atkCriticalRate = state.equipCrit;
     }
@@ -281,9 +287,10 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
     int capMinMatk = intStat / 2 + state.equipMatk;
     res.minMatk = std::min(baseMinMatk, capMinMatk);
 
-    if (res.maxMatk > res.minMatk && res.minMatk > 0) {
-        double critRatio = ((static_cast<double>(res.maxMatk) / res.minMatk) - 1.0) * 50.0;
-        res.matkCriticalRate = critRatio + state.equipCrit;
+    // Magical Critical Rate
+    double uncappedMinMatk = conStat + state.equipMatk / 2.0;
+    if (res.maxMatk < uncappedMinMatk && res.maxMatk > 0) {
+        res.matkCriticalRate = ((uncappedMinMatk / res.maxMatk) - 1.0) * 50.0 + state.equipCrit;
     } else {
         res.matkCriticalRate = state.equipCrit;
     }

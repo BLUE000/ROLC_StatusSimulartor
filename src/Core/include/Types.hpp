@@ -49,7 +49,9 @@ struct CharacterData {
     std::string name;
     ShareCategory shareCategory;
     int firstClassId;
-    std::array<int, 6> baseStats; // STR, DEX, VIT, INT, CON, MEN
+    int hpCoeff;
+    std::array<int, 6> baseStats; // STR, DEX, VIT, INT, CON, MEN (Lv100 values)
+    std::array<int, 6> baseStatCoeffs; // STR, DEX, VIT, INT, CON, MEN (web simulator coeffs)
     std::array<int, 24> weaponWearLevels; // 12 weapon R/L levels + wear levels
 };
 

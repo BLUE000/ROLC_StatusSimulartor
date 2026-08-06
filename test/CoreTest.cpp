@@ -37,7 +37,7 @@ private slots:
 
         auto result = rolc::CalculatorEngine::calculate(state);
 
-        QCOMPARE(result.finalStats[0], 63);
+        QCOMPARE(result.finalStats[0], 1346);
 
         // Remaining making points: 100 - cost(10) = 100 - 15 = 85
         QCOMPARE(result.remainingMakingPoints, 85);
@@ -168,10 +168,10 @@ private slots:
     }
 
     void testScreenshotVerification() {
-        // Verification against user screenshot
+        // Exact verification against user screenshot for Michal Lv5 / Restricted Lv5
         rolc::UserBuildState state;
         state.characterId = 7; // ミヒャル
-        state.level = 5;
+        state.level = 100;
         state.restrictedLevel = 5;
         state.moral = 100;
         state.equipAtk = 234;
@@ -181,12 +181,12 @@ private slots:
         state.firstClassId = 4; // KNT
         state.secondClassId = 5; // GLD
         state.thirdClassId = 4; // BSK
-        state.fourthClassId = 4; // SAM (active)
+        state.fourthClassId = 5; // SAM (active)
         state.exClassId = 5; // MNK
         state.currentClassStage = rolc::ClassStage::Fourth; // SAM
 
-        state.historyClassLevels = {5, 5, 5, 5, 5};
-        state.makingPoints = {17, 16, 10, 3, 1, 10};
+        state.historyClassLevels = {25, 53, 91, 100, 65};
+        state.makingPoints = {0, 0, 0, 0, 0, 0};
 
         state.rightHandTitleId = 54; // 全能 (+20%)
         state.leftHandTitleId = 54;  // 全能 (+20%)
@@ -196,23 +196,41 @@ private slots:
 
         auto res = rolc::CalculatorEngine::calculate(state);
 
-        QVERIFY(res.finalStats[0] > 0);
-        QCOMPARE(res.statPercentBonuses[0], 146);
+        qDebug() << "FINAL STR:" << res.finalStats[0] << "DEX:" << res.finalStats[1] << "VIT:" << res.finalStats[2]
+                 << "INT:" << res.finalStats[3] << "CON:" << res.finalStats[4] << "MEN:" << res.finalStats[5];
+        qDebug() << "BONUS STR %:" << res.statPercentBonuses[0] << "DEX %:" << res.statPercentBonuses[1]
+                 << "VIT %:" << res.statPercentBonuses[2] << "INT %:" << res.statPercentBonuses[3]
+                 << "CON %:" << res.statPercentBonuses[4] << "MEN %:" << res.statPercentBonuses[5];
+        qDebug() << "HP:" << res.hp << "minAtk:" << res.minAtk << "maxAtk:" << res.maxAtk;
 
-        QVERIFY(res.finalStats[1] > 0);
-        QCOMPARE(res.statPercentBonuses[1], 110);
+        // Final stats check against Qt App Screenshot titles
+        QCOMPARE(res.finalStats[0], 180); // STR
+        QCOMPARE(res.finalStats[1], 133); // DEX
+        QCOMPARE(res.finalStats[2], 148); // VIT
+        QCOMPARE(res.finalStats[3], 70);  // INT
+        QCOMPARE(res.finalStats[4], 60);  // CON
+        QCOMPARE(res.finalStats[5], 116); // MEN
 
-        QVERIFY(res.finalStats[2] > 0);
-        QCOMPARE(res.statPercentBonuses[2], 183);
+        // HP & MP check
+        QCOMPARE(res.hp, 1450);
 
-        QVERIFY(res.finalStats[3] > 0);
-        QCOMPARE(res.statPercentBonuses[3], 72);
+        // Physical ATK check
+        QCOMPARE(res.minAtk, 250);
+        QCOMPARE(res.maxAtk, 324);
+        QCOMPARE(res.atkCriticalRate, 5.0);
+        QCOMPARE(res.atkExpectation, 298.48);
 
-        QVERIFY(res.finalStats[4] > 0);
-        QCOMPARE(res.statPercentBonuses[4], 71);
+        // Magical MATK check
+        QCOMPARE(res.minMatk, 136);
+        QCOMPARE(res.maxMatk, 187);
+        QCOMPARE(res.matkCriticalRate, 5.0);
+        QCOMPARE(res.matkExpectation, 167.96);
 
-        QVERIFY(res.finalStats[5] > 0);
-        QCOMPARE(res.statPercentBonuses[5], 108);
+        // Hybrid AtkMatk check
+        QCOMPARE(res.minAtkMatk, 221);
+        QCOMPARE(res.maxAtkMatk, 293);
+        QCOMPARE(res.atkMatkCriticalRate, 5.0);
+        QCOMPARE(res.atkMatkExpectation, 267.28);
     }
 };
 
