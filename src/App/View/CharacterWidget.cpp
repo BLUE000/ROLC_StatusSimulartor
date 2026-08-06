@@ -17,51 +17,68 @@ CharacterWidget::CharacterWidget(SimulatorPresenter* presenter, QWidget* parent)
 
     // Section 1: Character & Share
     QGroupBox* charGroup = new QGroupBox("キャラクター・基本情報", this);
-    QGridLayout* charGrid = new QGridLayout(charGroup);
+    QVBoxLayout* charGroupLayout = new QVBoxLayout(charGroup);
 
-    charGrid->addWidget(new QLabel("編区分:"), 0, 0);
+    QHBoxLayout* row1Layout = new QHBoxLayout();
+    row1Layout->setContentsMargins(0, 0, 0, 0);
+    row1Layout->addWidget(new QLabel("編区分:"));
     m_editionCombo = new QComboBox(this);
     for (const auto& ed : MasterData::getEditions()) {
         m_editionCombo->addItem(QString::fromStdString(ed));
     }
     // Default to Earth Edition (index 1)
     m_editionCombo->setCurrentIndex(1);
-    charGrid->addWidget(m_editionCombo, 0, 1);
+    row1Layout->addWidget(m_editionCombo);
 
-    charGrid->addWidget(new QLabel("シェア:"), 0, 2);
+    row1Layout->addWidget(new QLabel("シェア:"));
     m_shareCombo = new QComboBox(this);
     for (const auto& share : MasterData::getShareCategories()) {
         m_shareCombo->addItem(QString::fromStdString(share));
     }
-    charGrid->addWidget(m_shareCombo, 0, 3);
+    row1Layout->addWidget(m_shareCombo);
 
     m_levelLimitNoticeLabel = new QLabel("[レベル上限: Lv100 (大地編/フリー)]", this);
-    charGrid->addWidget(m_levelLimitNoticeLabel, 0, 4);
+    row1Layout->addWidget(m_levelLimitNoticeLabel);
 
-    charGrid->addWidget(new QLabel("キャラ:"), 0, 5);
+    row1Layout->addWidget(new QLabel("キャラ:"));
     m_characterCombo = new QComboBox(this);
-    charGrid->addWidget(m_characterCombo, 0, 6);
+    row1Layout->addWidget(m_characterCombo);
+    row1Layout->addStretch();
 
-    charGrid->addWidget(new QLabel("モラル:"), 1, 0);
-    m_moralSpin = new QSpinBox(this);
-    m_moralSpin->setRange(0, 100);
-    m_moralSpin->setValue(100);
-    charGrid->addWidget(m_moralSpin, 1, 1);
+    QHBoxLayout* row2Layout = new QHBoxLayout();
+    row2Layout->setContentsMargins(0, 0, 0, 0);
 
-    charGrid->addWidget(new QLabel("装備ATK:"), 1, 2);
-    m_equipAtkSpin = new QSpinBox(this);
-    m_equipAtkSpin->setRange(0, 9999);
-    charGrid->addWidget(m_equipAtkSpin, 1, 3);
+    auto makeSpin = [this](int minVal, int maxVal, int defaultVal) {
+        QSpinBox* spin = new QSpinBox(this);
+        spin->setRange(minVal, maxVal);
+        spin->setValue(defaultVal);
+        spin->setMaximumWidth(80);
+        return spin;
+    };
 
-    charGrid->addWidget(new QLabel("装備MATK:"), 1, 4);
-    m_equipMatkSpin = new QSpinBox(this);
-    m_equipMatkSpin->setRange(0, 9999);
-    charGrid->addWidget(m_equipMatkSpin, 1, 5);
+    row2Layout->addWidget(new QLabel("モラル:"));
+    m_moralSpin = makeSpin(0, 100, 100);
+    row2Layout->addWidget(m_moralSpin);
 
-    charGrid->addWidget(new QLabel("装備会心:"), 2, 0);
-    m_equipCritSpin = new QSpinBox(this);
-    m_equipCritSpin->setRange(0, 100);
-    charGrid->addWidget(m_equipCritSpin, 2, 1);
+    row2Layout->addSpacing(15);
+    row2Layout->addWidget(new QLabel("装備ATK:"));
+    m_equipAtkSpin = makeSpin(0, 9999, 0);
+    row2Layout->addWidget(m_equipAtkSpin);
+
+    row2Layout->addSpacing(15);
+    row2Layout->addWidget(new QLabel("装備MATK:"));
+    m_equipMatkSpin = makeSpin(0, 9999, 0);
+    row2Layout->addWidget(m_equipMatkSpin);
+
+    row2Layout->addSpacing(15);
+    row2Layout->addWidget(new QLabel("装備会心:"));
+    m_equipCritSpin = makeSpin(0, 100, 0);
+    row2Layout->addWidget(m_equipCritSpin);
+
+    row2Layout->addStretch();
+
+    charGroupLayout->addLayout(row1Layout);
+    charGroupLayout->addLayout(row2Layout);
 
     mainLayout->addWidget(charGroup);
 
