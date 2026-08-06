@@ -1,6 +1,6 @@
-# ROLC ステータスシミュレーター 総合テスト仕様書 (Acceptance Test Specification)
+# ROLC ステータスシミュレーター 受入テスト仕様書
 
-- **文書バージョン**: 2.0.0
+- **文書バージョン**: 2.1.0
 - **最終更新日**: 2026-08-07
 - **対応設計書**: [01_RequirementDefinition.md](file:///d:/prog/C++/ROLC_StatusSimulator/docs/01_RequirementDefinition.md)
 - **対象システム**: ROLC ステータスシミュレーター (Qt6 / C++20 デスクトップアプリケーション)

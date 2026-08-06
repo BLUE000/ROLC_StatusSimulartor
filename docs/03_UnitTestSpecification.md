@@ -1,6 +1,6 @@
 # ROLC ステータスシミュレーター 単体テスト仕様書 (Unit Test Specification)
 
-- **文書バージョン**: 2.0.0
+- **文書バージョン**: 2.1.0
 - **最終更新日**: 2026-08-07
 - **対応設計書**: [03_DetailedDesign.md](file:///d:/prog/C++/ROLC_StatusSimulator/docs/03_DetailedDesign.md)
 - **対象システム**: ROLC ステータスシミュレーター (Qt6 / C++20)

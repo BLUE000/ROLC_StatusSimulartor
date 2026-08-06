@@ -205,65 +205,104 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
     int vit = res.finalStats[static_cast<int>(StatType::VIT)];
     int intStat = res.finalStats[static_cast<int>(StatType::INT)];
     int conStat = res.finalStats[static_cast<int>(StatType::CON)];
+    int menStat = res.finalStats[static_cast<int>(StatType::MEN)];
 
     int maxVit = res.maxTheoreticalStats[static_cast<int>(StatType::VIT)];
     int maxIntStat = res.maxTheoreticalStats[static_cast<int>(StatType::INT)];
 
     int lvl = effectiveLvl;
 
-    // 4. Calculate HP & MP
-    res.hp = config.hpFormula ? config.hpFormula(lvl, vit) : 0;
-    res.maxTheoreticalHp = config.hpFormula ? config.hpFormula(lvl, maxVit) : 0;
+    // 4. Desperate Skill Modifiers (statusbonus.js: desperate_atack_magic)
+    int vitMenAvg = (vit + menStat) / 2;
+    if (state.desperateAttack) {
+        double factor = state.berserkArmor ? 0.90 : 0.75;
+        str = static_cast<int>(std::floor((str + vitMenAvg) * factor));
+        dex = static_cast<int>(std::floor((dex + vitMenAvg) * factor));
+        vit = 0;
+        menStat = 0;
+    } else if (state.desperateMagic) {
+        double factor = state.wizardClothes ? 0.90 : 0.75;
+        intStat = static_cast<int>(std::floor((intStat + vitMenAvg) * factor));
+        conStat = static_cast<int>(std::floor((conStat + vitMenAvg) * factor));
+        vit = 0;
+        menStat = 0;
+    } else if (state.desperateAssault) {
+        double factor = state.conquerorArmor ? 0.85 : 0.70;
+        str = static_cast<int>(std::floor((str + vitMenAvg) * factor));
+        dex = static_cast<int>(std::floor((dex + vitMenAvg) * factor));
+        intStat = static_cast<int>(std::floor((intStat + vitMenAvg) * factor));
+        conStat = static_cast<int>(std::floor((conStat + vitMenAvg) * factor));
+        vit = 0;
+        menStat = 0;
+    }
 
-    res.mp = config.mpFormula ? config.mpFormula(lvl, intStat) : 0;
-    res.maxTheoreticalMp = config.mpFormula ? config.mpFormula(lvl, maxIntStat) : 0;
+    // 5. Calculate HP & MP (statusbonus.js: calc_character_HP)
+    if (config.hpFormula) {
+        res.hp = config.hpFormula(lvl, vit);
+        res.maxTheoreticalHp = config.hpFormula(lvl, maxVit);
+    } else {
+        int charHpCoeff = charData ? charData->baseStats[static_cast<int>(StatType::VIT)] : 10;
+        res.hp = static_cast<int>(std::floor((lvl + 20) * ((lvl + 20) * (charHpCoeff * 60 + lvl / 2.0 + 600) + 5000) / 5000.0)) * 10;
+        res.maxTheoreticalHp = res.hp;
+    }
 
-    // 5. Calculate Physical ATK
-    res.maxAtk = config.maxAtkFormula ? config.maxAtkFormula(lvl, str) : (state.equipAtk + static_cast<int>(std::floor(str * 1.8)));
-    res.minAtk = state.equipAtk / 2 + str + dex / 2;
-    if (res.minAtk > res.maxAtk) res.minAtk = res.maxAtk;
+    if (config.mpFormula) {
+        res.mp = config.mpFormula(lvl, intStat);
+        res.maxTheoreticalMp = config.mpFormula(lvl, maxIntStat);
+    } else {
+        res.mp = 1000;
+        res.maxTheoreticalMp = 1000;
+    }
 
-    // Critical Rate %
-    if (res.minAtk > 0 && res.maxAtk > res.minAtk) {
-        double ratio = (static_cast<double>(res.maxAtk) / res.minAtk) - 1.0;
-        res.atkCriticalRate = ratio * 75.0 + state.equipCrit;
+    // 6. Calculate Physical ATK (statusbonus.js: store_atk_matk_val)
+    res.maxAtk = str / 2 + state.equipAtk;
+    int baseMinAtk = dex + state.equipAtk / 2;
+    int capMinAtk = str / 2 + state.equipAtk;
+    res.minAtk = std::min(baseMinAtk, capMinAtk);
+
+    // Critical Rate % (statusbonus.js: calc_critical_rate)
+    if (res.maxAtk > res.minAtk && res.minAtk > 0) {
+        double critRatio = ((static_cast<double>(res.maxAtk) / res.minAtk) - 1.0) * 50.0;
+        res.atkCriticalRate = critRatio + state.equipCrit;
     } else {
         res.atkCriticalRate = state.equipCrit;
     }
-    if (res.atkCriticalRate < 0) res.atkCriticalRate = 0;
-    if (res.atkCriticalRate > 100) res.atkCriticalRate = 100;
+    if (res.atkCriticalRate > 100.0) res.atkCriticalRate = 100.0;
+    if (res.atkCriticalRate < 0.0) res.atkCriticalRate = 0.0;
 
-    // ATK Expectation
+    // ATK Expectation (statusbonus.js: calc_expectation)
     double avgAtk = (res.minAtk + res.maxAtk) / 2.0;
     double expAtk = avgAtk * (1.0 + (res.atkCriticalRate / 100.0) * 0.8);
-    res.atkExpectation = std::round(expAtk * 1000.0) / 1000.0;
+    res.atkExpectation = std::round(expAtk * 10000.0) / 10000.0;
 
-    // 6. Calculate Magical MATK
-    res.maxMatk = config.maxAtkFormula ? config.maxAtkFormula(lvl, intStat) : (state.equipMatk + static_cast<int>(std::floor(intStat * 1.8 + conStat * 0.8)));
-    res.minMatk = state.equipMatk / 2 + conStat;
-    if (res.minMatk > res.maxMatk) res.minMatk = res.maxMatk;
+    // 7. Calculate Magical MATK (statusbonus.js: store_atk_matk_val)
+    res.maxMatk = intStat / 2 + state.equipMatk;
+    int baseMinMatk = conStat + state.equipMatk / 2;
+    int capMinMatk = intStat / 2 + state.equipMatk;
+    res.minMatk = std::min(baseMinMatk, capMinMatk);
 
-    if (res.minMatk > 0 && res.maxMatk > res.minMatk) {
-        double ratio = (static_cast<double>(res.maxMatk) / res.minMatk) - 1.0;
-        res.matkCriticalRate = ratio * 75.0 + state.equipCrit;
+    if (res.maxMatk > res.minMatk && res.minMatk > 0) {
+        double critRatio = ((static_cast<double>(res.maxMatk) / res.minMatk) - 1.0) * 50.0;
+        res.matkCriticalRate = critRatio + state.equipCrit;
     } else {
         res.matkCriticalRate = state.equipCrit;
     }
-    if (res.matkCriticalRate < 0) res.matkCriticalRate = 0;
-    if (res.matkCriticalRate > 100) res.matkCriticalRate = 100;
+    if (res.matkCriticalRate > 100.0) res.matkCriticalRate = 100.0;
+    if (res.matkCriticalRate < 0.0) res.matkCriticalRate = 0.0;
 
     double avgMatk = (res.minMatk + res.maxMatk) / 2.0;
     double expMatk = avgMatk * (1.0 + (res.matkCriticalRate / 100.0) * 0.8);
-    res.matkExpectation = std::round(expMatk * 1000.0) / 1000.0;
+    res.matkExpectation = std::round(expMatk * 10000.0) / 10000.0;
 
-    // 7. Calculate Combined AtkMatk (物魔)
-    res.minAtkMatk = static_cast<int>(std::floor((res.minAtk + res.minMatk) * 0.575));
-    res.maxAtkMatk = static_cast<int>(std::floor((res.maxAtk + res.maxMatk) * 0.575));
+    // 8. Calculate Combined AtkMatk (物魔) (statusbonus.js: store_atk_matk_val)
+    double hybridFactor = state.desperateAssault ? 1.20 : 1.15;
+    res.maxAtkMatk = static_cast<int>(std::floor((res.maxAtk + res.maxMatk) / 2.0 * hybridFactor));
+    res.minAtkMatk = static_cast<int>(std::floor((res.minAtk + res.minMatk) / 2.0 * hybridFactor));
     res.atkMatkCriticalRate = (res.atkCriticalRate + res.matkCriticalRate) / 2.0;
     double avgAtkMatk = (res.minAtkMatk + res.maxAtkMatk) / 2.0;
-    res.atkMatkExpectation = std::round(avgAtkMatk * (1.0 + (res.atkMatkCriticalRate / 100.0) * 0.8) * 1000.0) / 1000.0;
+    res.atkMatkExpectation = std::round(avgAtkMatk * (1.0 + (res.atkMatkCriticalRate / 100.0) * 0.8) * 10000.0) / 10000.0;
 
-    // 8. Charge frames (下限 5f)
+    // 9. Charge frames (下限 5f)
     res.rightChargeFrames = std::max(5, 12 - dex / 10);
     res.leftChargeFrames = std::max(5, 16 - dex / 10);
 

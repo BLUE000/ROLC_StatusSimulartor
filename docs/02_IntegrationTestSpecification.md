@@ -1,6 +1,6 @@
-# ROLC ステータスシミュレーター 結合テスト仕様書 (Integration Test Specification)
+# ROLC ステータスシミュレーター 結合テスト仕様書
 
-- **文書バージョン**: 2.0.0
+- **文書バージョン**: 2.1.0
 - **最終更新日**: 2026-08-07
 - **対応設計書**: [02_BasicDesign.md](file:///d:/prog/C++/ROLC_StatusSimulator/docs/02_BasicDesign.md)
 - **対象システム**: ROLC ステータスシミュレーター (Qt6 / C++20)

@@ -22,3 +22,5 @@ trustchain_credentials.cmake
 DecisionLog/
 .ai_rules.md
 WIP_STATE.md
+test_html/
+test/local_sim/
