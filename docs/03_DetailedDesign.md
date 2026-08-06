@@ -1,51 +1,23 @@
 # ROLC ステータスシミュレーター 詳細設計書
 
-- **文書バージョン**: 1.8.0
+- **文書バージョン**: 1.9.0
 - **最終更新日**: 2026-08-06
 - **対象システム**: ROLC ステータスシミュレーター (Qt6 / C++20)
 
 ---
 
-## 1. 編区分（エピソード） & シェア構造定義 (`MasterData.hpp`, `Types.hpp`)
+## 1. 公式称号マスターデータ定義 (`MasterData.cpp`)
 
 ```cpp
-enum class Edition {
-    Kingdom = 0, // 王国編 (レベル上限 50)
-    Earth = 1    // 大地編 (レベル上限 100)
-};
-```
-
-### 編区分別シェアグループマッピング
-- **王国編 (`Edition::Kingdom`)**:
-  - `フリー` (ダニル, ハビル, ？？？？ 等)
-- **大地編 (`Edition::Earth`)**:
-  - `フリー` (フェルテス, ガンツェ, ティンガ, ジウバ, リセル, ゼンデ, ミヒャル, オルラン, ルビ, テオラーリ, ディミート, キリサス, イレス, クァラ)
-  - `メイキング`
-  - `呪われし血族`
-  - `砂漠に眠る王墓`
-  - `雪渓に佇む魔城`
-  - `炎塵に霞む遺産`
-  - `雷雲を貫く巨塔`
-  - `絶海に浮ぶ孤城`
-  - `深奥に潜む魔宮`
-  - `崖下に伏す古跡`
-  - `悠久を翔る廃都`
-  - `瘴気を纏う城塞`
-  - `異空を望む封域`
-
----
-
-## 2. C++20 データ構造体 & 状態同期仕様 (`Types.hpp`)
-
-```cpp
-namespace rolc {
-
-class MasterData {
-public:
-    static std::vector<std::string> getEditions();
-    static std::vector<std::string> getSharesForEdition(Edition edition);
-    static int getMaxLevelForEdition(Edition edition);
+struct TitleBonus {
+    int id;
+    std::string name;
+    bool isLimited;
+    std::array<int, 6> percentBonuses; // STR, DEX, VIT, INT, CON, MEN (%)
 };
 
-} // namespace rolc
+// 1種 (1~24)
+// 2種 (25~45): 強猛, 獰猛, 驍猛 / 蛮勇, 猛勇, 暴勇 / 俊才, 偉才, 鬼才 / 純心, 清心, 至心 / 制裁, 聖裁, 神裁 / 無心, 無我, 無想 / 不撓, 不屈, 不倒
+// 3種 (46~51): 胆気(20), 闘気(25), 覇気(40) [Str/Dex/Vit] / 恩恵(20), 慈恵(25), 天恵(40) [Int/Con/Men]
+// 6種 (52~54): 多能(全+10%), 万能(全+15%), 全能(全+20%)
 ```
