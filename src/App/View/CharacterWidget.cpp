@@ -45,12 +45,7 @@ CharacterWidget::CharacterWidget(SimulatorPresenter* presenter, QWidget* parent)
     m_restrictedLevelSpin->setRange(1, 100);
     m_restrictedLevelSpin->setValue(100);
     m_restrictedLevelSpin->setMaximumWidth(60);
-    m_restrictedLevelSpin->setEnabled(false);
     row1Layout->addWidget(m_restrictedLevelSpin);
-
-    m_restrictedAutoCheck = new QCheckBox("自動", this);
-    m_restrictedAutoCheck->setChecked(true);
-    row1Layout->addWidget(m_restrictedAutoCheck);
 
     row1Layout->addWidget(new QLabel("キャラ:"));
     m_characterCombo = new QComboBox(this);
@@ -182,19 +177,8 @@ CharacterWidget::CharacterWidget(SimulatorPresenter* presenter, QWidget* parent)
     connect(m_equipMatkSpin, QOverload<int>::of(&QSpinBox::valueChanged), m_presenter, &SimulatorPresenter::onEquipMatkChanged);
     connect(m_equipCritSpin, QOverload<int>::of(&QSpinBox::valueChanged), m_presenter, &SimulatorPresenter::onEquipCritChanged);
 
-    connect(m_restrictedAutoCheck, &QCheckBox::toggled, [this](bool checked) {
-        m_restrictedLevelSpin->setEnabled(!checked);
-        if (checked) {
-            m_presenter->onRestrictedLevelChanged(0);
-        } else {
-            m_presenter->onRestrictedLevelChanged(m_restrictedLevelSpin->value());
-        }
-    });
-
     connect(m_restrictedLevelSpin, QOverload<int>::of(&QSpinBox::valueChanged), [this](int val) {
-        if (!m_restrictedAutoCheck->isChecked()) {
-            m_presenter->onRestrictedLevelChanged(val);
-        }
+        m_presenter->onRestrictedLevelChanged(val);
     });
 
     connect(m_firstClassCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int idx) {

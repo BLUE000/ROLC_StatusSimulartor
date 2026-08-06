@@ -32,7 +32,6 @@ private:
     QComboBox* m_shareCombo;
     QLabel* m_levelLimitNoticeLabel;
     QSpinBox* m_restrictedLevelSpin;
-    QCheckBox* m_restrictedAutoCheck;
     QComboBox* m_characterCombo;
     QSpinBox* m_moralSpin;
     QSpinBox* m_equipAtkSpin;
