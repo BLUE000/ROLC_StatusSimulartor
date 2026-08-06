@@ -7,7 +7,13 @@
 #include <cstdint>
 #include <functional>
 
+#ifndef APP_VERSION
+#define APP_VERSION "1.0.0"
+#endif
+
 namespace rolc {
+
+constexpr const char* ROLC_APP_VERSION = APP_VERSION;
 
 enum class StatType {
     STR = 0,

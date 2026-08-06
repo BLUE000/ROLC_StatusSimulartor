@@ -181,7 +181,7 @@ private slots:
         state.firstClassId = 4; // KNT
         state.secondClassId = 5; // GLD
         state.thirdClassId = 4; // BSK
-        state.fourthClassId = 5; // SAM (active)
+        state.fourthClassId = 4; // SAM (active)
         state.exClassId = 5; // MNK
         state.currentClassStage = rolc::ClassStage::Fourth; // SAM
 

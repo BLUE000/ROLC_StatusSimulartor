@@ -115,13 +115,12 @@ static const std::vector<ClassData> g_thirdClasses = {
 
 static const std::vector<ClassData> g_fourthClasses = {
     {1, "ヒーロー", "HRO", ClassStage::Fourth, {15, 15, -20, 15, 15, -20}, {}},
-    {2, "コンカラー", "CNQ", ClassStage::Fourth, {20, 0, -15, 20, 0, -15}, {}},
-    {3, "忍者", "NIN", ClassStage::Fourth, {-10, 30, -10, -10, 30, -10}, {}},
-    {4, "ソードマスター", "SDM", ClassStage::Fourth, {30, 30, -10, -10, -10, -10}, {}},
-    {5, "侍", "SAM", ClassStage::Fourth, {30, -10, 30, -10, -10, -10}, {}},
-    {6, "パラディン", "PLD", ClassStage::Fourth, {-10, -10, 30, -10, -10, 30}, {}},
-    {7, "セージ", "SAG", ClassStage::Fourth, {-10, -10, -10, 30, -10, 30}, {}},
-    {8, "スペルマスター", "SPM", ClassStage::Fourth, {-10, -10, -10, 30, 30, -10}, {}}
+    {2, "忍者", "NIN", ClassStage::Fourth, {-10, 30, -10, -10, 30, -10}, {}},
+    {3, "ソードマスター", "SDM", ClassStage::Fourth, {30, 30, -10, -10, -10, -10}, {}},
+    {4, "侍", "SAM", ClassStage::Fourth, {30, -10, 30, -10, -10, -10}, {}},
+    {5, "パラディン", "PLD", ClassStage::Fourth, {-10, -10, 30, -10, -10, 30}, {}},
+    {6, "セージ", "SAG", ClassStage::Fourth, {-10, -10, -10, 30, -10, 30}, {}},
+    {7, "スペルマスター", "SPM", ClassStage::Fourth, {-10, -10, -10, 30, 30, -10}, {}}
 };
 
 static const std::vector<ClassData> g_exClasses = {
