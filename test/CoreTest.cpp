@@ -124,6 +124,27 @@ private slots:
         auto result = rolc::CalculatorEngine::calculate(state);
         // Default 1st Class SOL (+10% STR) + Title 剛力 (+60% STR) = 70%
         QCOMPARE(result.statPercentBonuses[0], 70);
+
+        // UT-MASTER-010: 蛮勇 (ID: 28) -> STR/VIT +20%
+        auto title28 = rolc::MasterData::getTitleBonusById(28);
+        QVERIFY(title28 != nullptr);
+        QCOMPARE(title28->name, std::string("蛮勇 (STR/VIT+20%)"));
+        QCOMPARE(title28->percentBonuses[0], 20);
+        QCOMPARE(title28->percentBonuses[2], 20);
+
+        // UT-MASTER-011: 闘気 (ID: 47) -> STR/DEX/VIT +25%
+        auto title47 = rolc::MasterData::getTitleBonusById(47);
+        QVERIFY(title47 != nullptr);
+        QCOMPARE(title47->name, std::string("闘気 (STR/DEX/VIT+25%)"));
+        QCOMPARE(title47->percentBonuses[0], 25);
+        QCOMPARE(title47->percentBonuses[1], 25);
+        QCOMPARE(title47->percentBonuses[2], 25);
+
+        // UT-MASTER-012: 万能 (ID: 53) -> All +15%
+        auto title53 = rolc::MasterData::getTitleBonusById(53);
+        QVERIFY(title53 != nullptr);
+        QCOMPARE(title53->name, std::string("万能 (全+15%)"));
+        QCOMPARE(title53->percentBonuses[0], 15);
     }
 };
 
