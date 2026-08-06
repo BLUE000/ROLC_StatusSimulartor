@@ -31,6 +31,7 @@ public slots:
     void onClassSelected(ClassStage stage, int classId);
     void onCurrentClassStageChanged(ClassStage stage);
     void onHistoryClassLevelChanged(ClassStage stage, int level);
+    void onRestrictedLevelChanged(int level);
 
     void onMakingPointChanged(StatType stat, int pointValue);
 

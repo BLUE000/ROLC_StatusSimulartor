@@ -7,6 +7,7 @@
 #include <QLabel>
 #include <QRadioButton>
 #include <QButtonGroup>
+#include <QCheckBox>
 #include "Types.hpp"
 
 namespace rolc {
@@ -30,6 +31,8 @@ private:
     QComboBox* m_editionCombo;
     QComboBox* m_shareCombo;
     QLabel* m_levelLimitNoticeLabel;
+    QSpinBox* m_restrictedLevelSpin;
+    QCheckBox* m_restrictedAutoCheck;
     QComboBox* m_characterCombo;
     QSpinBox* m_moralSpin;
     QSpinBox* m_equipAtkSpin;

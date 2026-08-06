@@ -149,6 +149,8 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
     int currentClassLvl = state.historyClassLevels[currentStageIdx];
     if (currentClassLvl <= 0) currentClassLvl = 1;
 
+    int effectiveLvl = (state.restrictedLevel > 0) ? std::min(currentClassLvl, state.restrictedLevel) : currentClassLvl;
+
     const int classIds[5] = {
         state.firstClassId, state.secondClassId, state.thirdClassId,
         state.fourthClassId, state.exClassId
@@ -166,9 +168,10 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
         if (histClass) {
             int histLvl = state.historyClassLevels[s];
             if (histLvl < 0) histLvl = 0;
+            int effectiveHistLvl = std::min(histLvl, effectiveLvl);
 
-            double ratio = (static_cast<double>(histLvl) / currentClassLvl) / 2.0;
-            double maxRatio = (100.0 / currentClassLvl) / 2.0;
+            double ratio = (static_cast<double>(effectiveHistLvl) / effectiveLvl) / 2.0;
+            double maxRatio = (100.0 / effectiveLvl) / 2.0;
 
             for (int i = 0; i < 6; ++i) {
                 double baseHist = 10.0 * ratio;
@@ -201,11 +204,12 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
     int dex = res.finalStats[static_cast<int>(StatType::DEX)];
     int vit = res.finalStats[static_cast<int>(StatType::VIT)];
     int intStat = res.finalStats[static_cast<int>(StatType::INT)];
+    int conStat = res.finalStats[static_cast<int>(StatType::CON)];
 
     int maxVit = res.maxTheoreticalStats[static_cast<int>(StatType::VIT)];
     int maxIntStat = res.maxTheoreticalStats[static_cast<int>(StatType::INT)];
 
-    int lvl = state.level;
+    int lvl = effectiveLvl;
 
     // 4. Calculate HP & MP
     res.hp = config.hpFormula ? config.hpFormula(lvl, vit) : 0;
@@ -215,8 +219,8 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
     res.maxTheoreticalMp = config.mpFormula ? config.mpFormula(lvl, maxIntStat) : 0;
 
     // 5. Calculate Physical ATK
-    res.maxAtk = config.maxAtkFormula ? config.maxAtkFormula(lvl, str) : 0;
-    res.minAtk = str / 2 + state.equipAtk;
+    res.maxAtk = config.maxAtkFormula ? config.maxAtkFormula(lvl, str) : (state.equipAtk + static_cast<int>(std::floor(str * 1.8)));
+    res.minAtk = state.equipAtk / 2 + str + dex / 2;
     if (res.minAtk > res.maxAtk) res.minAtk = res.maxAtk;
 
     // Critical Rate %
@@ -235,8 +239,8 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
     res.atkExpectation = std::round(expAtk * 1000.0) / 1000.0;
 
     // 6. Calculate Magical MATK
-    res.maxMatk = config.maxAtkFormula ? config.maxAtkFormula(lvl, intStat) : 0;
-    res.minMatk = intStat / 2 + state.equipMatk;
+    res.maxMatk = config.maxAtkFormula ? config.maxAtkFormula(lvl, intStat) : (state.equipMatk + static_cast<int>(std::floor(intStat * 1.8 + conStat * 0.8)));
+    res.minMatk = state.equipMatk / 2 + conStat;
     if (res.minMatk > res.maxMatk) res.minMatk = res.maxMatk;
 
     if (res.minMatk > 0 && res.maxMatk > res.minMatk) {
@@ -252,16 +256,16 @@ DerivedStatsResult CalculatorEngine::calculate(const UserBuildState& state, cons
     double expMatk = avgMatk * (1.0 + (res.matkCriticalRate / 100.0) * 0.8);
     res.matkExpectation = std::round(expMatk * 1000.0) / 1000.0;
 
-    // 7. Calculate Combined AtkMatk
-    res.minAtkMatk = static_cast<int>(std::floor((res.minAtk + res.minMatk) / 2.0));
-    res.maxAtkMatk = static_cast<int>(std::floor((res.maxAtk + res.maxMatk) / 2.0));
+    // 7. Calculate Combined AtkMatk (物魔)
+    res.minAtkMatk = static_cast<int>(std::floor((res.minAtk + res.minMatk) * 0.575));
+    res.maxAtkMatk = static_cast<int>(std::floor((res.maxAtk + res.maxMatk) * 0.575));
     res.atkMatkCriticalRate = (res.atkCriticalRate + res.matkCriticalRate) / 2.0;
     double avgAtkMatk = (res.minAtkMatk + res.maxAtkMatk) / 2.0;
     res.atkMatkExpectation = std::round(avgAtkMatk * (1.0 + (res.atkMatkCriticalRate / 100.0) * 0.8) * 1000.0) / 1000.0;
 
-    // 8. Charge frames
-    res.rightChargeFrames = std::max(0, 30 - dex / 10);
-    res.leftChargeFrames = std::max(0, 30 - dex / 10);
+    // 8. Charge frames (下限 5f)
+    res.rightChargeFrames = std::max(5, 12 - dex / 10);
+    res.leftChargeFrames = std::max(5, 16 - dex / 10);
 
     return res;
 }

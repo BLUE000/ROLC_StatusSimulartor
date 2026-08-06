@@ -1,23 +1,35 @@
 # ROLC ステータスシミュレーター 詳細設計書
 
-- **文書バージョン**: 1.9.0
-- **最終更新日**: 2026-08-06
+- **文書バージョン**: 2.0.0
+- **最終更新日**: 2026-08-07
 - **対象システム**: ROLC ステータスシミュレーター (Qt6 / C++20)
 
 ---
 
-## 1. 公式称号マスターデータ定義 (`MasterData.cpp`)
+## 1. 制限レベル & 公式戦闘派生ステータス計算構造体
 
 ```cpp
-struct TitleBonus {
-    int id;
-    std::string name;
-    bool isLimited;
-    std::array<int, 6> percentBonuses; // STR, DEX, VIT, INT, CON, MEN (%)
+struct UserBuildState {
+    int level = 100;                 // 現在のクラス到達レベル
+    int restrictedLevel = 0;         // 制限レベル (0の場合は制限なし/自動)
+    // ... 他のフィールド
 };
 
-// 1種 (1~24)
-// 2種 (25~45): 強猛, 獰猛, 驍猛 / 蛮勇, 猛勇, 暴勇 / 俊才, 偉才, 鬼才 / 純心, 清心, 至心 / 制裁, 聖裁, 神裁 / 無心, 無我, 無想 / 不撓, 不屈, 不倒
-// 3種 (46~51): 胆気(20), 闘気(25), 覇気(40) [Str/Dex/Vit] / 恩恵(20), 慈恵(25), 天恵(40) [Int/Con/Men]
-// 6種 (52~54): 多能(全+10%), 万能(全+15%), 全能(全+20%)
+// 計算エンジン内部ロジック
+int effectiveLvl = (state.restrictedLevel > 0) ? std::min(state.level, state.restrictedLevel) : state.level;
+
+// 1. 物魔攻撃力
+res.minAtkMatk = static_cast<int>(std::floor((res.minAtk + res.minMatk) * 0.575));
+res.maxAtkMatk = static_cast<int>(std::floor((res.maxAtk + res.maxMatk) * 0.575));
+
+// 2. 物理/魔法攻撃力
+res.minAtk = state.equipAtk / 2 + str + dex / 2;
+res.maxAtk = state.equipAtk + static_cast<int>(std::floor(str * 1.8));
+
+res.minMatk = state.equipMatk / 2 + conStat;
+res.maxMatk = state.equipMatk + static_cast<int>(std::floor(intStat * 1.8 + conStat * 0.8));
+
+// 3. チャージフレーム
+res.rightChargeFrames = std::max(5, rightWeaponBaseFrames - dex / 10);
+res.leftChargeFrames = std::max(5, leftWeaponBaseFrames - dex / 10);
 ```

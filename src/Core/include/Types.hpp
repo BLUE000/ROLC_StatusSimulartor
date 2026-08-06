@@ -83,9 +83,11 @@ enum class Edition {
 
 struct UserBuildState {
     Edition edition{Edition::Earth};
+    int level{100};
+    int restrictedLevel{0}; // 0 = no limit / auto, >0 = restricted level limit (e.g. 5)
+
     int shareCategoryId{1};
     int characterId{1};
-    int level{1};
     int moral{100};
     int equipAtk{0};
     int equipMatk{0};

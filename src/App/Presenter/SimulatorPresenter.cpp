@@ -86,6 +86,11 @@ void SimulatorPresenter::onHistoryClassLevelChanged(ClassStage stage, int level)
     }
 }
 
+void SimulatorPresenter::onRestrictedLevelChanged(int level) {
+    m_state.restrictedLevel = level;
+    recalculate();
+}
+
 void SimulatorPresenter::onMakingPointChanged(StatType stat, int pointValue) {
     int idx = static_cast<int>(stat);
     if (idx >= 0 && idx < 6) {

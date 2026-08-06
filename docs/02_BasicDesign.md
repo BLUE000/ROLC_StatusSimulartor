@@ -1,12 +1,12 @@
 # ROLC ステータスシミュレーター 基本設計書
 
-- **文書バージョン**: 1.9.0
-- **最終更新日**: 2026-08-06
+- **文書バージョン**: 2.0.0
+- **最終更新日**: 2026-08-07
 - **対象システム**: ROLC ステータスシミュレーター (Qt6 / C++20)
 
 ---
 
-## 1. システムアーキテクチャ概要 (MVP パターン & TrustChain 統合)
+## 1. システムアーキテクチャ概要 (MVP パターン & Restricted Level 統合)
 
 UI層（Qt6 Widgets）とビジネスロジック（C++20 Domain Engine）を分離するため、**Model-View-Presenter (MVP)** パターンを採用する。
 
@@ -15,12 +15,11 @@ UI層（Qt6 Widgets）とビジネスロジック（C++20 Domain Engine）を分
 ## 2. コンポーネントおよびモジュール設計
 
 ### (1) 画面ビュー層 (`App/View`) - Qt6 Widgets
-- `EquipmentWidget`:
-  - 右手, 左手, 胴, 手, 足 の5部位に対して、修正された最新公式称号一覧（1種・2種・3種・6種上昇称号）のドロップダウン選択肢を提供する。
+- `CharacterWidget`:
+  - 編区分（王国/大地）、シェアComboBox、キャラクター選択ComboBox、各クラスレベルSpinBoxに加え、**「制限レベル SpinBox / Auto CheckBox」** を提供する。
+- `OutputWidget`:
+  - 物理、魔法、物魔（Min - Max, 会心%, 期待値）、HP, MP, 右手/左手チャージ(f) を視覚的に整形出力する。
 
 ### (2) ドメインコア (`Lib/ROLC_Core`) - C++20 (Qt非依存)
-- `MasterData`:
-  - 1種称号: 怪力, 強力, 大力, 剛力 / 巧技, 妙技, 絶技, 神技 / 堅強, 精強, 屈強, 雄強 / 才知, 英知, 全知, 至知 / 鋭意, 専意, 我意, 如意 / 加護, 庇護, 冥護, 応護
-  - 2種称号: 強猛, 獰猛, 驍猛 / 蛮勇, 猛勇, 暴勇 / 俊才, 偉才, 鬼才 / 純心, 清心, 至心 / 制裁, 聖裁, 神裁 / 無心, 無我, 無想 / 不撓, 不屈, 不倒
-  - 3種称号: 胆気(+20%), 闘気(+25%), 覇気(+40%) [Str/Dex/Vit] / 恩恵(+20%), 慈恵(+25%), 天恵(+40%) [Int/Con/Men]
-  - 6種称号: 多能(+10%), 万能(+15%), 全能(+20%)
+- `CalculatorEngine`:
+  - `UserBuildState` に `restrictedLevel` を追加。制限レベル指定時、`effectiveLevel = min(currentClassLevel, restrictedLevel)` を基準に全ステータス、レベル成長値、クラス履歴比率（`histLvl / effectiveLevel`）、派生攻撃力・物魔・チャージ時間を算出する。

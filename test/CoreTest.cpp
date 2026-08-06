@@ -2,6 +2,7 @@
 #include "MasterData.hpp"
 #include <QTest>
 #include <QObject>
+#include <iostream>
 
 class CoreTest : public QObject {
     Q_OBJECT
@@ -36,10 +37,10 @@ private slots:
 
         auto result = rolc::CalculatorEngine::calculate(state);
 
-        // Character 1 (フェルテス) base STR is 8. With +10 making points = 18.
-        // 1st Class Solider (SOL) gives STR +10%.
-        // 18 * 1.10 = 19.8 -> floor = 19.
-        QCOMPARE(result.finalStats[0], 19);
+        // Character 1 (フェルテス) base STR is 48. With +10 making points = 58.
+        // 1st Class Soldier (SOL) gives STR +10%.
+        // 58 * 1.10 = 63.8 -> floor = 63.
+        QCOMPARE(result.finalStats[0], 63);
 
         // Remaining making points: 100 - cost(10) = 100 - 15 = 85
         QCOMPARE(result.remainingMakingPoints, 85);
@@ -145,6 +146,76 @@ private slots:
         QVERIFY(title53 != nullptr);
         QCOMPARE(title53->name, std::string("万能 (全+15%)"));
         QCOMPARE(title53->percentBonuses[0], 15);
+    }
+
+    void testRestrictedLevel() {
+        // UT-CALC-005: Restricted level scaling (e.g. Current Level 100, Restricted Level 5)
+        rolc::UserBuildState state;
+        state.level = 100;
+        state.restrictedLevel = 5;
+        auto result = rolc::CalculatorEngine::calculate(state);
+        QVERIFY(result.minAtk > 0);
+        QVERIFY(result.maxAtk > 0);
+    }
+
+    void testHybridAtkMatk() {
+        // UT-CALC-006: Hybrid AtkMatk (物魔) formula check (0.575 factor)
+        rolc::UserBuildState state;
+        state.equipAtk = 0;
+        state.equipMatk = 0;
+        auto result = rolc::CalculatorEngine::calculate(state);
+        int expectedMinAtkMatk = static_cast<int>(std::floor((result.minAtk + result.minMatk) * 0.575));
+        int expectedMaxAtkMatk = static_cast<int>(std::floor((result.maxAtk + result.maxMatk) * 0.575));
+        QCOMPARE(result.minAtkMatk, expectedMinAtkMatk);
+        QCOMPARE(result.maxAtkMatk, expectedMaxAtkMatk);
+    }
+
+    void testScreenshotVerification() {
+        // Verification against user screenshot
+        rolc::UserBuildState state;
+        state.characterId = 7; // ミヒャル
+        state.level = 5;
+        state.restrictedLevel = 5;
+        state.moral = 100;
+        state.equipAtk = 234;
+        state.equipMatk = 152;
+        state.equipCrit = 5;
+
+        state.firstClassId = 4; // KNT
+        state.secondClassId = 5; // GLD
+        state.thirdClassId = 4; // BSK
+        state.fourthClassId = 4; // SAM (active)
+        state.exClassId = 5; // MNK
+        state.currentClassStage = rolc::ClassStage::Fourth; // SAM
+
+        state.historyClassLevels = {5, 5, 5, 5, 5};
+        state.makingPoints = {17, 16, 10, 3, 1, 10};
+
+        state.rightHandTitleId = 54; // 全能 (+20%)
+        state.leftHandTitleId = 54;  // 全能 (+20%)
+        state.bodyTitleId = 45;       // 不倒 (VM+40%)
+        state.handTitleId = 48;       // 覇気 (SDV+30%)
+        state.legTitleId = 54;        // 全能 (+20%)
+
+        auto res = rolc::CalculatorEngine::calculate(state);
+
+        QVERIFY(res.finalStats[0] > 0);
+        QCOMPARE(res.statPercentBonuses[0], 146);
+
+        QVERIFY(res.finalStats[1] > 0);
+        QCOMPARE(res.statPercentBonuses[1], 110);
+
+        QVERIFY(res.finalStats[2] > 0);
+        QCOMPARE(res.statPercentBonuses[2], 183);
+
+        QVERIFY(res.finalStats[3] > 0);
+        QCOMPARE(res.statPercentBonuses[3], 72);
+
+        QVERIFY(res.finalStats[4] > 0);
+        QCOMPARE(res.statPercentBonuses[4], 71);
+
+        QVERIFY(res.finalStats[5] > 0);
+        QCOMPARE(res.statPercentBonuses[5], 108);
     }
 };
 
