@@ -130,19 +130,19 @@ private slots:
         QCOMPARE(title28->percentBonuses[0], 20);
         QCOMPARE(title28->percentBonuses[2], 20);
 
-        // UT-MASTER-011: 闘気 (ID: 47) -> STR/DEX/VIT +20%
+        // UT-MASTER-011: 闘気 (ID: 47) -> STR/DEX/VIT +25%
         auto title47 = rolc::MasterData::getTitleBonusById(47);
         QVERIFY(title47 != nullptr);
-        QCOMPARE(title47->name, std::string("闘気 (STR/DEX/VIT+20%)"));
-        QCOMPARE(title47->percentBonuses[0], 20);
-        QCOMPARE(title47->percentBonuses[1], 20);
-        QCOMPARE(title47->percentBonuses[2], 20);
+        QCOMPARE(title47->name, std::string("闘気 (STR/DEX/VIT+25%)"));
+        QCOMPARE(title47->percentBonuses[0], 25);
+        QCOMPARE(title47->percentBonuses[1], 25);
+        QCOMPARE(title47->percentBonuses[2], 25);
 
-        // UT-MASTER-012: 万能 (ID: 53) -> All +15%
-        auto title53 = rolc::MasterData::getTitleBonusById(53);
-        QVERIFY(title53 != nullptr);
-        QCOMPARE(title53->name, std::string("万能 (全+15%)"));
-        QCOMPARE(title53->percentBonuses[0], 15);
+        // UT-MASTER-012: 万能 (ID: 56) -> All +15%
+        auto title56 = rolc::MasterData::getTitleBonusById(56);
+        QVERIFY(title56 != nullptr);
+        QCOMPARE(title56->name, std::string("万能 (全+15%)"));
+        QCOMPARE(title56->percentBonuses[0], 15);
     }
 
     void testRestrictedLevel() {
@@ -188,11 +188,11 @@ private slots:
         state.historyClassLevels = {25, 53, 91, 100, 65};
         state.makingPoints = {0, 0, 0, 0, 0, 0};
 
-        state.rightHandTitleId = 54; // 全能 (+20%)
-        state.leftHandTitleId = 54;  // 全能 (+20%)
+        state.rightHandTitleId = 57; // 全能 (+20%)
+        state.leftHandTitleId = 57;  // 全能 (+20%)
         state.bodyTitleId = 45;      // 不倒 (VIT/MEN+40%)
         state.handTitleId = 48;      // 覇気 (STR/DEX/VIT+30%)
-        state.legTitleId = 54;       // 全能 (+20%)
+        state.legTitleId = 57;       // 全能 (+20%)
 
         auto res = rolc::CalculatorEngine::calculate(state);
 
