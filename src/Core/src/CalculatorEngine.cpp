@@ -43,6 +43,9 @@ int CalculatorEngine::calculateMaxMakingPoints(const UserBuildState& state, cons
     if (state.thirdClassId != 0) maxPts += config.classUnlockMakingPointBonus;
     if (state.fourthClassId != 0) maxPts += config.classUnlockMakingPointBonus;
     if (state.exClassId != 0) maxPts += config.classUnlockMakingPointBonus;
+    if (!state.isNonShare) {
+        maxPts += config.classUnlockMakingPointBonus; // Share bonus (+10pt)
+    }
     return maxPts;
 }
 

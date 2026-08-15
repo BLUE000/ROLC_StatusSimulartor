@@ -29,7 +29,6 @@ private:
     QCheckBox* m_desperateAttackCheck;
     QCheckBox* m_desperateMagicCheck;
     QCheckBox* m_desperateAssaultCheck;
-    QCheckBox* m_nonShareCheck;
 };
 
 } // namespace rolc

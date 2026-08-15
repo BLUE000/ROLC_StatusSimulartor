@@ -15,17 +15,13 @@ EquipmentWidget::EquipmentWidget(SimulatorPresenter* presenter, QWidget* parent)
 {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
-    // Section 1: Titles & Amplifiers
-    QGroupBox* equipGroup = new QGroupBox("装備称号 & アンプ選択", this);
+    // Section 1: Equipment Titles
+    QGroupBox* equipGroup = new QGroupBox("装備称号", this);
     QGridLayout* grid = new QGridLayout(equipGroup);
 
     grid->addWidget(new QLabel("右手称号:"), 0, 0);
     m_rightHandTitleCombo = new QComboBox(this);
     grid->addWidget(m_rightHandTitleCombo, 0, 1);
-
-    grid->addWidget(new QLabel("アンプ:"), 0, 2);
-    m_amplifierCombo = new QComboBox(this);
-    grid->addWidget(m_amplifierCombo, 0, 3);
 
     grid->addWidget(new QLabel("左手称号:"), 1, 0);
     m_leftHandTitleCombo = new QComboBox(this);
@@ -56,27 +52,33 @@ EquipmentWidget::EquipmentWidget(SimulatorPresenter* presenter, QWidget* parent)
     populateTitles(m_handTitleCombo);
     populateTitles(m_legTitleCombo);
 
-    // Populate Amplifier Combo
+    mainLayout->addWidget(equipGroup);
+
+    // Section 2: Skill Buffs & Special Settings (Compact 2-row layout)
+    QGroupBox* buffGroup = new QGroupBox("スキルバフ・特殊設定", this);
+    QVBoxLayout* buffMainLayout = new QVBoxLayout(buffGroup);
+
+    QHBoxLayout* ampRow = new QHBoxLayout();
+    ampRow->addWidget(new QLabel("アンプ:"));
+    m_amplifierCombo = new QComboBox(this);
     m_amplifierCombo->clear();
     for (const auto& a : MasterData::getAmplifierBonuses()) {
         m_amplifierCombo->addItem(QString::fromStdString(a.name), a.id);
     }
+    ampRow->addWidget(m_amplifierCombo);
+    ampRow->addStretch();
+    buffMainLayout->addLayout(ampRow);
 
-    mainLayout->addWidget(equipGroup);
-
-    // Section 2: Skill Buffs
-    QGroupBox* buffGroup = new QGroupBox("スキルバフ・特殊設定", this);
-    QHBoxLayout* buffLayout = new QHBoxLayout(buffGroup);
-
+    QHBoxLayout* checkRow = new QHBoxLayout();
     m_desperateAttackCheck = new QCheckBox("デスペレイトアタック", this);
     m_desperateMagicCheck = new QCheckBox("デスペレイトマジック", this);
     m_desperateAssaultCheck = new QCheckBox("デスペレイトアサルト", this);
-    m_nonShareCheck = new QCheckBox("ノンシェア", this);
 
-    buffLayout->addWidget(m_desperateAttackCheck);
-    buffLayout->addWidget(m_desperateMagicCheck);
-    buffLayout->addWidget(m_desperateAssaultCheck);
-    buffLayout->addWidget(m_nonShareCheck);
+    checkRow->addWidget(m_desperateAttackCheck);
+    checkRow->addWidget(m_desperateMagicCheck);
+    checkRow->addWidget(m_desperateAssaultCheck);
+    checkRow->addStretch();
+    buffMainLayout->addLayout(checkRow);
 
     mainLayout->addWidget(buffGroup);
 
@@ -103,7 +105,6 @@ EquipmentWidget::EquipmentWidget(SimulatorPresenter* presenter, QWidget* parent)
     connect(m_desperateAttackCheck, &QCheckBox::toggled, m_presenter, &SimulatorPresenter::onDesperateAttackToggled);
     connect(m_desperateMagicCheck, &QCheckBox::toggled, m_presenter, &SimulatorPresenter::onDesperateMagicToggled);
     connect(m_desperateAssaultCheck, &QCheckBox::toggled, m_presenter, &SimulatorPresenter::onDesperateAssaultToggled);
-    connect(m_nonShareCheck, &QCheckBox::toggled, m_presenter, &SimulatorPresenter::onNonShareToggled);
 }
 
 } // namespace rolc

@@ -16,9 +16,19 @@ StatusWidget::StatusWidget(SimulatorPresenter* presenter, QWidget* parent)
     QGroupBox* statusGroup = new QGroupBox("基本ステータス振り分け & 計算結果", this);
     QGridLayout* grid = new QGridLayout(statusGroup);
 
-    m_remainingPointLabel = new QLabel("残りポイント: 100 / 100", this);
+    QHBoxLayout* topRow = new QHBoxLayout();
+    m_nonShareCheck = new QCheckBox("ノンシェア", this);
+    topRow->addWidget(m_nonShareCheck);
+    topRow->addSpacing(15);
+
+    m_remainingPointLabel = new QLabel("残りポイント: 150 / 150", this);
     m_remainingPointLabel->setStyleSheet("font-weight: bold; font-size: 14px; color: #1e88e5;");
-    grid->addWidget(m_remainingPointLabel, 0, 0, 1, 6);
+    topRow->addWidget(m_remainingPointLabel);
+    topRow->addStretch();
+
+    grid->addLayout(topRow, 0, 0, 1, 6);
+
+    connect(m_nonShareCheck, &QCheckBox::toggled, m_presenter, &SimulatorPresenter::onNonShareToggled);
 
     const char* statNames[6] = {"STR", "DEX", "VIT", "INT", "CON", "MEN"};
 

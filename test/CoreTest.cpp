@@ -18,15 +18,25 @@ private slots:
 
     void testMaxMakingPoints() {
         rolc::UserBuildState state;
-        QCOMPARE(rolc::CalculatorEngine::calculateMaxMakingPoints(state), 100);
+        // Default (Share bonus included)
+        QCOMPARE(rolc::CalculatorEngine::calculateMaxMakingPoints(state), 110);
 
         state.secondClassId = 1;
-        QCOMPARE(rolc::CalculatorEngine::calculateMaxMakingPoints(state), 110);
+        QCOMPARE(rolc::CalculatorEngine::calculateMaxMakingPoints(state), 120);
 
         state.thirdClassId = 1;
         state.fourthClassId = 1;
         state.exClassId = 1;
+        QCOMPARE(rolc::CalculatorEngine::calculateMaxMakingPoints(state), 150);
+
+        // Non-share mode
+        state.isNonShare = true;
         QCOMPARE(rolc::CalculatorEngine::calculateMaxMakingPoints(state), 140);
+        state.secondClassId = 0;
+        state.thirdClassId = 0;
+        state.fourthClassId = 0;
+        state.exClassId = 0;
+        QCOMPARE(rolc::CalculatorEngine::calculateMaxMakingPoints(state), 100);
     }
 
     void testFeltesBaseCalculation() {
@@ -39,8 +49,8 @@ private slots:
 
         QCOMPARE(result.finalStats[0], 1346);
 
-        // Remaining making points: 100 - cost(10) = 100 - 15 = 85
-        QCOMPARE(result.remainingMakingPoints, 85);
+        // Remaining making points (default share mode): 110 - cost(10) = 110 - 15 = 95
+        QCOMPARE(result.remainingMakingPoints, 95);
         QVERIFY(result.hp > 0);
         QVERIFY(result.mp > 0);
         QVERIFY(result.maxAtk >= result.minAtk);
