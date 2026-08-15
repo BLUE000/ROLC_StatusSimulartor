@@ -37,9 +37,6 @@ CharacterWidget::CharacterWidget(SimulatorPresenter* presenter, QWidget* parent)
     }
     row1Layout->addWidget(m_shareCombo);
 
-    m_levelLimitNoticeLabel = new QLabel("[レベル上限: Lv100 (大地編/フリー)]", this);
-    row1Layout->addWidget(m_levelLimitNoticeLabel);
-
     row1Layout->addWidget(new QLabel("制限Lv:"));
     m_restrictedLevelSpin = new QSpinBox(this);
     m_restrictedLevelSpin->setRange(1, 100);
@@ -305,14 +302,6 @@ void CharacterWidget::updateDerivedClassCombos() {
 void CharacterWidget::updateLevelLimits() {
     Edition edition = static_cast<Edition>(m_editionCombo->currentIndex());
     int maxLvl = MasterData::getMaxLevelForEdition(edition);
-
-    if (edition == Edition::Kingdom) { // 王国編
-        m_levelLimitNoticeLabel->setText("[レベル上限: Lv50 (王国編)]");
-        m_levelLimitNoticeLabel->setStyleSheet("QLabel { font-weight: bold; color: #ffaa00; background-color: #332200; padding: 2px 6px; border-radius: 3px; }");
-    } else {
-        m_levelLimitNoticeLabel->setText("[レベル上限: Lv100 (大地編)]");
-        m_levelLimitNoticeLabel->setStyleSheet("QLabel { font-weight: bold; color: #00d2ff; background-color: #002233; padding: 2px 6px; border-radius: 3px; }");
-    }
 
     auto updateSpin = [maxLvl](QSpinBox* spin) {
         spin->setMaximum(maxLvl);

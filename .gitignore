@@ -1,5 +1,10 @@
 # Build outputs and temporary packaging directories
 build/
+build_debug/
+build_release/
+build_logs/
+tests/
+test_log/
 dist/
 tmp/
 *.zip
